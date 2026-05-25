@@ -1,0 +1,219 @@
+.container {
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+.main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.titulo {
+  text-align: center;
+  color: #000000;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.searchContainer {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #888;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recursoCard {
+  background-color: #dbdbdb;
+  border-radius: 8px;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recursoNome {
+  font-size: 18px;
+  color: #222;
+  font-weight: 500;
+}
+
+.actionIcons {
+  display: flex;
+  gap: 10px;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background-color: #f4f6fb;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.iconBtn:hover {
+  transform: scale(1.05);
+  background-color: #e9effb;
+  border-color: #c6d6f1;
+}
+
+.editIcon {
+  color: #004080;
+}
+
+.deleteIcon {
+  color: #dc3545;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+}
+
+.addIcon {
+  color: white;
+}
+
+/* 🪟 MODAL */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  border: 1px solid #004080;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0px 4px 20px rgba(0,0,0,0.3);
+}
+
+.closeModal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.modalTitle {
+  text-align: center;
+  text-transform: uppercase;
+  color: #000;
+  font-size: 22px;
+  margin-bottom: 25px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.modalLabel {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.modalInput {
+  padding: 10px 12px;
+  border: 1px solid #888;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.modalInput:focus {
+  border-color: #004080;
+}
+
+.saveButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #004080;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+}

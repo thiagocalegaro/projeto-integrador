@@ -1,12 +1,23 @@
-import { Body, Controller, Get, Post, UseGuards, Param, Patch, HttpCode, HttpStatus, Delete, Query } from '@nestjs/common';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Patch, 
+  Param, 
+  Delete, 
+  ParseIntPipe, 
+  HttpCode, 
+  HttpStatus,
+  UseGuards
+} from '@nestjs/common';
 import { SalasService } from './salas.service';
 import { CreateSalaDto } from './dto/create-sala.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
-import { RolesGuard } from '../auth/guards/roles.guards';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from '../usuarios/enums/role.enum';
 import { UpdateSalaDto } from './dto/update-sala.dto';
-
+import { Role } from '../usuarios/enums/role.enum';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guards';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
 
 @Controller('salas')
 export class SalasController {
@@ -15,52 +26,38 @@ export class SalasController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
+  @HttpCode(HttpStatus.CREATED)
   create(@Body() createSalaDto: CreateSalaDto) {
     return this.salasService.create(createSalaDto);
   }
 
-  @Get('ativas')
-  @UseGuards(JwtAuthGuard)
-  findAllAtiva() {
-    return this.salasService.findAllAtiva();
-  }
-
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
-  findAll(){
+  @UseGuards(JwtAuthGuard)
+  findAll() {
     return this.salasService.findAll();
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.salasService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
-  update(@Param('id') id: string, @Body() updateSalaDto: UpdateSalaDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() updateSalaDto: UpdateSalaDto
+  ) {
     return this.salasService.update(id, updateSalaDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
-  @HttpCode(HttpStatus.NO_CONTENT) 
-  remove(@Param('id') id: string) {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.salasService.remove(id);
   }
-
-  @Get('disponiveis')
-  @UseGuards(JwtAuthGuard)
-  findAvailable(
-    @Query('data') data: string,
-    @Query('hora_inicio') hora_inicio: string,
-    @Query('hora_fim') hora_fim: string,
-    @Query('capacidade') capacidade: number,
-  ) {
-    return this.salasService.findAvailable(data, hora_inicio, hora_fim, +capacidade);
-  }
-
 }

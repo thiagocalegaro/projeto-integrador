@@ -1,4 +1,3 @@
-// src/salas/dto/recurso-quantidade.dto.ts
 import { IsInt, Min } from 'class-validator';
 
 export class RecursoQuantidadeDto {

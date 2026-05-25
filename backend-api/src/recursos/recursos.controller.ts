@@ -27,9 +27,15 @@ export class RecursosController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.recursosService.findAll();
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  update(@Param('id') id: string, @Body() createRecursoDto: CreateRecursoDto) {
+    return this.recursosService.update(+id, createRecursoDto);
   }
 
   @Get(':id')

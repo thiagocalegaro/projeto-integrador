@@ -14,19 +14,13 @@ export class Excecao {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Sala, (sala) => sala.excecoes, {
-    onDelete: 'CASCADE'
-  })
-  @JoinColumn({ name: 'codigo_sala' })
-  sala: Sala;
-
   @Column({ type: 'timestamp', nullable: false })
   inicio: Date;
 
   @Column({ type: 'timestamp', nullable: false })
   fim: Date;
 
-  @Column({ type: 'enum', enum: TipoExcecao, nullable: false })
+  @Column({ type: 'enum', enum: TipoExcecao, nullable: true })
   tipo: TipoExcecao;
 
   @Column({ type: 'varchar', length: 100, nullable: false })
@@ -37,4 +31,8 @@ export class Excecao {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToOne(() => Sala, { onDelete: 'CASCADE' }) 
+  @JoinColumn({ name: 'id_sala' }) 
+  sala: Sala;
 }

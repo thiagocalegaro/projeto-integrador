@@ -4,8 +4,8 @@ import { SalasService } from './salas.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Sala } from './entities/sala.entity';
 import { SalaRecurso } from './entities/sala_recurso.entity';
-import { Agendamento } from 'src/agendamentos/entities/agendamento.entity';
-import { Excecao } from 'src/excecoes/entities/excecoes.entity';
+import { Agendamento } from '../agendamentos/entities/agendamento.entity';
+import { Excecao } from '../excecoes/entities/excecoes.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Sala, SalaRecurso, Agendamento, Excecao])],

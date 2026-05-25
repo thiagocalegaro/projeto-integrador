@@ -8,8 +8,10 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  NotFoundException // 1. Importe a ConflictException
+  BadRequestException,
+  NotFoundException
 } from '@nestjs/common';
+import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -27,7 +29,6 @@ export class UsuariosService {
     }
 
     const isFirstAccount = (await this.usuariosRepository.count()) === 0;
-    // 2. Se for a primeira conta, define o tipo como Admin, senão, como User.
     const tipo = isFirstAccount ? Role.Admin : Role.User;
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(
@@ -40,7 +41,7 @@ export class UsuariosService {
       senha: hashedPassword,
       tipo: tipo,
     });
-
+    
     return this.usuariosRepository.save(newUser);
   }
 
@@ -78,4 +79,24 @@ export class UsuariosService {
     if (resultado.affected === 0) {
       throw new NotFoundException(`Sala com código ${id} não encontrada.`);
     }  }
+
+  async update(id: number, updateUsuarioDto: UpdateUsuarioDto): Promise<Usuario> {
+    const usuario = await this.usuariosRepository.findOneBy({ id });
+    
+    if (!usuario) {
+      throw new NotFoundException(`Usuário com ID ${id} não foi encontrado.`);
+    }
+    const { senha, confirmar_senha, ...dadosParaAtualizar } = updateUsuarioDto;
+    Object.assign(usuario, dadosParaAtualizar);
+
+    // só se a senha for enviada e não está vazia
+    if (senha && senha.trim() !== '') {
+      if (senha !== confirmar_senha) {
+        throw new BadRequestException('As senhas digitadas não coincidem.');
+      }
+      const salt = await bcrypt.genSalt(10);
+      usuario.senha = await bcrypt.hash(senha, salt);
+    }
+    return await this.usuariosRepository.save(usuario);
+  }
 }

@@ -10,15 +10,15 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
 
 @Module({
   imports: [
-    UsuariosModule, // Importamos para poder usar o UsuariosService
+    UsuariosModule, 
     PassportModule,
-    ConfigModule, // Precisamos do ConfigModule para ler o .env
+    ConfigModule, 
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' }, // Token expira em 1 hora
+        signOptions: { expiresIn: '1h' },
       }),
     }),
   ],

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { describe, beforeEach, it, expect } from '@jest/globals';
 import { AgendamentosController } from './agendamentos.controller';
 import { AgendamentosService } from './agendamentos.service';
 
@@ -18,3 +19,4 @@ describe('AgendamentosController', () => {
     expect(controller).toBeDefined();
   });
 });
+

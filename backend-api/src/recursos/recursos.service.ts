@@ -32,4 +32,10 @@ export class RecursosService {
     await this.salasRepository.remove(recurso);
     return recurso;
   }
+
+  async update(id: number, createRecursoDto: CreateRecursoDto): Promise<Recurso> {
+    const recurso = await this.findOne(id);
+    Object.assign(recurso, createRecursoDto);
+    return this.salasRepository.save(recurso);
+  }
 }

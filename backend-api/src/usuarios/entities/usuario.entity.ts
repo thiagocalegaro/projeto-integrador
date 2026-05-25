@@ -23,7 +23,7 @@ export class Usuario {
   @Column({ type: 'varchar', length: 100, nullable: false })
   senha: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.User, nullable: false })
+  @Column({ type: 'enum', enum: Role, default: Role.User, nullable: true })
   tipo: Role;
 
   @OneToMany(() => Agendamento, (agendamento) => agendamento.usuario)

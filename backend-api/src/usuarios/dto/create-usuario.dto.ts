@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MinLength, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, IsEmail, IsOptional } from 'class-validator';
 import { Role } from '../enums/role.enum';
 import { Match } from '../../decorators/match.decorator';
 
@@ -17,11 +17,11 @@ export class CreateUsuarioDto {
   @MinLength(6)
   senha: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  tipo: Role;
+  tipo?: Role;
 
   @IsNotEmpty()
-  @Match('senha', { message: 'As senhas não correspondem.' }) // Aplica o decorator
+  @Match('senha', { message: 'As senhas não correspondem.' })
   confirmar_senha: string;
 }

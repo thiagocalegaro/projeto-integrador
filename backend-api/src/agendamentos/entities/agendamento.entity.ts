@@ -1,34 +1,24 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
-  Column,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Sala } from '../../salas/entities/sala.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
+import { Turno } from '../enums/turno.enum';
 
 @Entity('agendamentos')
 export class Agendamento {
   @PrimaryGeneratedColumn()
-  id: number;
+  id_agendamento: number;
 
-  @ManyToOne(() => Sala, (sala) => sala.agendamentos, {
-    onDelete: 'CASCADE'
-  })
-  @JoinColumn({ name: 'codigo_sala' })
-  sala: Sala;
-
-  @ManyToOne(() => Usuario, (usuario) => usuario.agendamentos)
-  @JoinColumn({ name: 'id_usuario' })
-  usuario: Usuario;
-
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'date' })
   data: Date;
 
-  @Column({ type: 'time', nullable: false })
-  hora_inicio: string;
+  @Column({ type: 'enum', enum: Turno })
+  turno: Turno;
 
-  @Column({ type: 'time', nullable: false })
-  hora_fim: string;
+  @ManyToOne(() => Sala, (sala) => sala.agendamentos, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'id_sala' }) 
+  sala!: Sala;
+
+  @ManyToOne(() => Usuario, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'id_usuario' })
+  usuario: Usuario;
 }

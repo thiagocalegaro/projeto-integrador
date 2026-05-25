@@ -1,0 +1,147 @@
+.container {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.titulo {
+  text-align: center;
+  color: #000;
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.searchContainer {
+  position: relative;
+  flex: 1;
+  max-width: 450px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #888;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.userCard {
+  background-color: #dbdbdb;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.userInfo h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #000;
+}
+
+.userInfo p {
+  margin: 5px 0 0;
+  color: #444;
+  font-size: 14px;
+}
+
+.userBadge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.badgeAdmin { background-color: #004080; color: white; }
+.badgeUser { background-color: #666; color: white; }
+
+.actionIcons {
+  display: flex;
+  gap: 15px;
+}
+
+.iconBtn { background: none; border: none; cursor: pointer; }
+.editIcon { color: #333; }
+.deleteIcon { color: #dc3545; }
+
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0,0,0,0.4);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  width: 100%; max-width: 450px;
+  padding: 30px; border-radius: 8px;
+  border: 1px solid #004080;
+  position: relative;
+}
+
+.closeModal { position: absolute; top: 15px; right: 15px; background: none; border: none; cursor: pointer; }
+
+.modalTitle { text-align: center; text-transform: uppercase; margin-bottom: 25px; }
+
+.formGroup { display: flex; flex-direction: column; margin-bottom: 15px; }
+
+.modalLabel { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+
+.modalInput { padding: 10px; border: 1px solid #888; border-radius: 6px; }
+
+.saveButton {
+  width: 100%; padding: 12px; margin-top: 10px;
+  background-color: #004080; color: white;
+  border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+  text-transform: uppercase;
+}
+

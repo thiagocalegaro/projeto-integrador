@@ -1,0 +1,306 @@
+/* src/pages/Salas.module.css */
+.container {
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+.main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.titulo {
+  text-align: center;
+  color: #000000;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+}
+
+/* 🔍 Barra de Ações (Filtro + Botão Adicionar) */
+.actionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.searchContainer {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #888;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+}
+
+/* 🎴 Lista de Cards de Sala */
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.salaCard {
+  background-color: #dbdbdb;
+  border-radius: 12px;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #b5b5b5;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.cardTitle {
+  font-size: 20px;
+  color: #004080;
+  font-weight: bold;
+}
+
+.actionIcons {
+  display: flex;
+  gap: 15px;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.iconBtn:hover {
+  transform: scale(1.1);
+}
+
+.editIcon { color: #333; }
+.deleteIcon { color: #dc3545; }
+
+.cardBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 15px;
+  color: #222;
+}
+
+.infoLine {
+  margin: 2px 0;
+}
+
+/* 🪟 MODAL SUPERIOR (CRIAR / EDITAR) */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 8px;
+  border: 1px solid #004080;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0px 4px 20px rgba(0,0,0,0.3);
+}
+
+.closeModal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.modalTitle {
+  text-align: center;
+  text-transform: uppercase;
+  color: #000;
+  font-size: 24px;
+  margin-bottom: 25px;
+  letter-spacing: 0.5px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.formGroupRow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.modalLabel {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.modalInput {
+  padding: 8px 12px;
+  border: 1px solid #888;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.modalInput:focus {
+  border-color: #004080;
+}
+
+.checkboxGroup {
+  display: flex;
+  gap: 15px;
+  margin-top: 5px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.saveButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #004080;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 15px;
+}
+
+.recursosListBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.recursoBadge {
+  background-color: #004080;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.recursosFormSection {
+  margin-top: 20px;
+  border-top: 1px dashed #ccc;
+  padding-top: 15px;
+}
+
+.recursosFormHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.btnAdicionarRecurso {
+  background: none;
+  border: none;
+  color: #004080;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btnAdicionarRecurso:hover {
+  text-decoration: underline;
+}
+
+.recursoRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.btnRemoverLinha {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.btnRemoverLinha:hover {
+  opacity: 0.7;
+}

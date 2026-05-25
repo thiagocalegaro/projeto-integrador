@@ -2,15 +2,14 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
-  BadRequestException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, LessThan, MoreThan, Repository, MoreThanOrEqual } from 'typeorm';
+import { DataSource, Repository, MoreThanOrEqual } from 'typeorm';
 import { addWeeks } from 'date-fns';
 import { Agendamento } from './entities/agendamento.entity';
 import { CreateAgendamentoDto } from './dto/create-agendamento.dto';
 import { CreateAgendamentoRecorrenteDto } from './dto/create-agendamento-recorrente.dto';
-import { SalasService } from '../salas/salas.service'; // Importe os serviços
+import { SalasService } from '../salas/salas.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { Turno } from './enums/turno.enum';
 
@@ -18,118 +17,84 @@ import { Turno } from './enums/turno.enum';
 export class AgendamentosService {
   constructor(
     @InjectRepository(Agendamento)
-    private agendamentosRepository: Repository<Agendamento>,
-    private salasService: SalasService,
-    private usuariosService: UsuariosService,
-    private dataSource: DataSource,
+    private readonly agendamentosRepository: Repository<Agendamento>,
+    private readonly salasService: SalasService,
+    private readonly usuariosService: UsuariosService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(dto: CreateAgendamentoDto): Promise<Agendamento> {
-    
-    // 1. Traduz o turno para horas
-    let hora_inicio: string;
-    let hora_fim: string;
-    switch (dto.turno) {
-      case Turno.MANHA: hora_inicio = '08:00:00'; hora_fim = '12:00:00'; break;
-      case Turno.TARDE: hora_inicio = '12:00:00'; hora_fim = '18:00:00'; break;
-      case Turno.NOITE: hora_inicio = '18:00:00'; hora_fim = '23:00:00'; break;
-      default: throw new BadRequestException('Turno inválido.');
-    }
-
-    const sala = await this.salasService.findOne(dto.codigo_sala);
+    // 1. Busca a sala e valida se existe
+    const sala = await this.salasService.findOne(dto.id_sala);
     if (!sala) {
-      throw new NotFoundException(`Sala com código ${dto.codigo_sala} não encontrada.`);
+      throw new NotFoundException(`Sala com ID ${dto.id_sala} não encontrada.`);
     }
 
-    if (hora_inicio < sala.hora_inicio || hora_fim > sala.hora_fim) {
-      throw new ConflictException(
-        `O funcionamento desta sala é das ${sala.hora_inicio.substring(0,5)} às ${sala.hora_fim.substring(0,5)}.`
-      );
-    }
-    
+    this.validarFuncionamentoSalaTurno(sala, dto.turno);
+
     const dataAgendamento = new Date(dto.data);
-    const isDisponivel = await this.verificarDisponibilidade(
-      dto.codigo_sala,
-      dataAgendamento,
-      hora_inicio,
-      hora_fim,
-    );
+    const isDisponivel = await this.verificarDisponibilidade(dto.id_sala, dataAgendamento, dto.turno);
     if (!isDisponivel) {
-      throw new ConflictException(`A sala já está ocupada neste horário.`);
+      throw new ConflictException(`A sala já está ocupada neste turno.`);
     }
 
-    // Busca o usuário
     const usuario = await this.usuariosService.findOne(dto.id_usuario);
     if (!usuario) {
       throw new NotFoundException(`Usuário com ID ${dto.id_usuario} não encontrado.`);
     }
 
-    // Salva o agendamento
     const novoAgendamento = this.agendamentosRepository.create({
       data: dataAgendamento,
+      turno: dto.turno,
       sala,
       usuario,
-      hora_inicio,
-      hora_fim,
     });
     return this.agendamentosRepository.save(novoAgendamento);
   }
 
   async createRecorrente(dto: CreateAgendamentoRecorrenteDto): Promise<Agendamento[]> {
-    const { codigo_sala, id_usuario, data, turno, numero_de_semanas } = dto;
-    
-    // Traduz o turno para horas
-    let hora_inicio: string;
-    let hora_fim: string;
-    switch (turno) {
-      case Turno.MANHA: hora_inicio = '07:00:00'; hora_fim = '12:00:00'; break;
-      case Turno.TARDE: hora_inicio = '12:00:00'; hora_fim = '18:00:00'; break;
-      case Turno.NOITE: hora_inicio = '18:00:00'; hora_fim = '23:00:00'; break;
-      default: throw new BadRequestException('Turno inválido.');
-    }
+    const { id_sala, id_usuario, data, turno, numero_de_semanas } = dto;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // Busca as entidades fora do loop
-      const sala = await this.salasService.findOne(codigo_sala);
-      if (!sala) throw new NotFoundException(`Sala ${codigo_sala} não encontrada.`);
-      const usuario = await this.usuariosService.findOne(id_usuario);
-      if (!usuario) throw new NotFoundException(`Usuário ${id_usuario} não encontrado.`);
+      const sala = await this.salasService.findOne(id_sala);
+      if (!sala) throw new NotFoundException(`Sala com ID ${id_sala} não encontrada.`);
 
-      if (hora_inicio < sala.hora_inicio || hora_fim > sala.hora_fim) {
-        throw new ConflictException(
-          `Horário indisponível. O funcionamento desta sala é das ${sala.hora_inicio.substring(0,5)} às ${sala.hora_fim.substring(0,5)}.`
-        );
-      }
+      const usuario = await this.usuariosService.findOne(id_usuario);
+      if (!usuario) throw new NotFoundException(`Usuário com ID ${id_usuario} não encontrado.`);
+
+      this.validarFuncionamentoSalaTurno(sala, turno);
 
       const agendamentosCriados: Agendamento[] = [];
       const dataInicial = new Date(data);
 
-      // Loop para criar os agendamentos semanais
       for (let i = 0; i < numero_de_semanas; i++) {
         const dataDaSemana = addWeeks(dataInicial, i);
 
-        // Verifica a disponibilidade (conflitos com outros)
-        const isDisponivel = await this.verificarDisponibilidade(
-          codigo_sala,
-          dataDaSemana,
-          hora_inicio,
-          hora_fim,
-        );
-        if (!isDisponivel) {
-          throw new ConflictException(`A sala já está ocupada na data ${dataDaSemana.toISOString().split('T')[0]}`);
+        const conflito = await queryRunner.manager.findOne(Agendamento, {
+          where: {
+            sala: { id_sala },
+            data: dataDaSemana,
+            turno: turno,
+          },
+        });
+
+        if (conflito) {
+          throw new ConflictException(
+            `A sala já está ocupada no turno solicitado na data ${dataDaSemana.toISOString().split('T')[0]}`
+          );
         }
 
         const novoAgendamento = queryRunner.manager.create(Agendamento, {
           data: dataDaSemana,
-          hora_inicio,
-          hora_fim,
+          turno: turno,
           sala,
           usuario,
         });
+
         const agendamentoSalvo = await queryRunner.manager.save(novoAgendamento);
         agendamentosCriados.push(agendamentoSalvo);
       }
@@ -144,70 +109,80 @@ export class AgendamentosService {
     }
   }
 
-  async verificarDisponibilidade(
-    codigo_sala: string,
-    data: Date,
-    hora_inicio: string,
-    hora_fim: string,
-  ): Promise<boolean> {
+  async verificarDisponibilidade(id_sala: number, data: Date, turno: Turno): Promise<boolean> {
     const conflitos = await this.agendamentosRepository.count({
       where: {
-        sala: { codigo: codigo_sala },
+        sala: { id_sala },
         data: data,
-        hora_inicio: LessThan(hora_fim),
-        hora_fim: MoreThan(hora_inicio),
+        turno: turno,
       },
     });
     return conflitos === 0;
   }
 
- 
   async findAll() {
-    return this.agendamentosRepository.find({ relations: ['sala', 'usuario'],
-      order: { data: 'DESC' }
-     });
+    return this.agendamentosRepository.find({
+      relations: { sala: true, usuario: true }, 
+      order: { data: 'DESC' },
+    });
   }
 
+  async findMy(userId: number): Promise<Agendamento[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-async findMy(userId: number): Promise<Agendamento[]> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); 
-
-  return this.agendamentosRepository.find({
-    where: {
-      usuario: { id: userId },
-      data: MoreThanOrEqual(today), 
-    },
-    relations: ['sala'],
-    order: {
-      data: 'ASC',
-      hora_inicio: 'ASC',
-    },
-  });
-}
-
-  findOne(id: number) {
-    return this.agendamentosRepository.findOne({
-      where: { id },
-      relations: ['sala', 'usuario'],
+    return this.agendamentosRepository.find({
+      where: {
+        usuario: { id_usuario: userId } as any, 
+        data: MoreThanOrEqual(today),
+      },
+      relations: { sala: true }, 
+      order: {
+        data: 'ASC',
+        turno: 'ASC',
+      },
     });
+  }
+
+  async findOne(id: number) {
+    const agendamento = await this.agendamentosRepository.findOne({
+      where: { id_agendamento: id },
+      relations: { sala: true, usuario: true },
+    });
+
+    if (!agendamento) {
+      throw new NotFoundException(`Agendamento com ID ${id} não encontrado.`);
+    }
+
+    return agendamento;
   }
 
   remove(id: number) {
-    return this.agendamentosRepository.delete(id);
+    return this.agendamentosRepository.delete(id); 
   }
 
-  async findHorariosDisponiveis(codigo_sala: string, data: string) {
+  async findTurnosOcupados(id_sala: number, data: string) {
     const agendamentos = await this.agendamentosRepository.find({
       where: {
-        sala: { codigo: codigo_sala },
+        sala: { id_sala },
         data: new Date(data),
       },
-      order: { hora_inicio: 'ASC' },
+      order: { turno: 'ASC' },
     });
     return agendamentos.map((a) => ({
-      hora_inicio: a.hora_inicio,
-      hora_fim: a.hora_fim,
+      turno_ocupado: a.turno,
     }));
+  }
+
+  private validarFuncionamentoSalaTurno(sala: any, turno: Turno): void {
+    if (turno === Turno.MANHA && !sala.disponivel_manha) {
+      throw new ConflictException('Esta sala não está disponível no turno da manhã.');
+    }
+    if (turno === Turno.TARDE && !sala.disponivel_tarde) {
+      throw new ConflictException('Esta sala não está disponível no turno da tarde.');
+    }
+    if (turno === Turno.NOITE && !sala.disponivel_noite) {
+      throw new ConflictException('Esta sala não está disponível no turno da noite.');
+    }
   }
 }

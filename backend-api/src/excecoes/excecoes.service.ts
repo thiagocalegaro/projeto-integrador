@@ -37,15 +37,15 @@ export class ExcecoesService {
   }
 
   private async criarParaSalaUnica(dto: CreateExcecaoDto): Promise<Excecao> {
-    if (!dto.codigo_sala) {
+    if (!dto.id_sala) {
       throw new BadRequestException(
         'O campo "codigo_sala" é obrigatório para este escopo.',
       );
     }
-    const sala = await this.salasService.findOne(dto.codigo_sala);
+    const sala = await this.salasService.findOne(dto.id_sala);
     if (!sala) {
       throw new NotFoundException(
-        `Sala com código ${dto.codigo_sala} não encontrada.`,
+        `Sala com código ${dto.id_sala} não encontrada.`,
       );
     }
 
@@ -94,10 +94,9 @@ export class ExcecoesService {
       return excecoesCriadas;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException(
-        'Falha ao criar exceções para o bloco.',
-        error,
-      );
+      throw new InternalServerErrorException('Falha ao criar exceções para o bloco.', {
+        cause: error as Error,
+      });
     } finally {
       await queryRunner.release();
     }
@@ -131,10 +130,9 @@ export class ExcecoesService {
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException(
-        'Falha ao criar exceções para o bloco.',
-        error,
-      );
+      throw new InternalServerErrorException('Falha ao criar exceções para o bloco.', {
+        cause: error as Error,
+      });
     } finally {
       await queryRunner.release();
     }

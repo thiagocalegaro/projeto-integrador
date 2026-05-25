@@ -19,15 +19,11 @@ export class SalaRecurso {
   quantidade: number;
 
 
-  @ManyToOne(() => Sala, (sala) => sala.salaRecursos, {
-    onDelete: 'CASCADE'
-  })
-  @JoinColumn({ name: 'codigo_sala' })
-  sala: Sala;
+  @ManyToOne(() => Sala, (sala) => sala.agendamentos, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'id_sala' }) 
+  sala!: Sala;
 
-  @ManyToOne(() => Recurso, (recurso) => recurso.salaRecursos, {
-    onDelete: 'CASCADE' 
-  })
+  @ManyToOne(() => Recurso, (recurso) => recurso.salaRecursos, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'id_recurso' })
   recurso: Recurso;
 }

@@ -1,12 +1,11 @@
-// src/agendamentos/dto/create-agendamento-recorrente.dto.ts
 import { IsDate, IsEnum, IsNotEmpty, IsInt, IsString, Min } from 'class-validator';
 import { Turno } from '../enums/turno.enum';
 import { Type } from 'class-transformer';
 
 export class CreateAgendamentoRecorrenteDto {
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  codigo_sala: string;
+  id_sala: number;
 
   @IsInt()
   @IsNotEmpty()
@@ -22,6 +21,6 @@ export class CreateAgendamentoRecorrenteDto {
   turno: Turno;
 
   @IsInt()
-  @Min(2) // Deve ser pelo menos 2 semanas para ser recorrente
+  @Min(2)
   numero_de_semanas: number;
 }

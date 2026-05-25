@@ -1,4 +1,3 @@
-// src/salas/dto/create-sala.dto.ts
 import { 
   IsString, 
   IsNotEmpty, 
@@ -30,24 +29,24 @@ export class CreateSalaDto {
   capacidade: number;
 
   @IsString()
+  @IsOptional()
+  foto_url?: string;
+
+  @IsBoolean()
   @IsNotEmpty()
-  hora_inicio: string;
+  disponivel_manha: boolean;
 
-  @IsString()
+  @IsBoolean()
   @IsNotEmpty()
-  hora_fim: string;
+  disponivel_tarde: boolean;
 
   @IsBoolean()
-  @IsOptional()
-  disponivel_sabado: boolean;
+  @IsNotEmpty()
+  disponivel_noite: boolean;
 
   @IsBoolean()
-  @IsOptional()
-  disponivel_domingo: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  isAtiva: boolean;
+  @IsNotEmpty()
+  ativa: boolean;
 
   @IsOptional()
   @IsArray()
