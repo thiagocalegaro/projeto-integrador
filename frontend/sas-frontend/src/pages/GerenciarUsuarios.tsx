@@ -41,6 +41,7 @@ export default function GerenciarUsuarios() {
     setNome('');
     setEmail('');
     setSenha('');
+    setConfirmarSenha('');
     setTipo('user');
     setIsModalAberto(true);
   }
