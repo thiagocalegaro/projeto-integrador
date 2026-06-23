@@ -14,14 +14,14 @@ import { AgendamentosModule } from './agendamentos/agendamentos.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '1234',
-      database: 'booking-system',
+  type: 'postgres',
+      host: process.env.DB_HOST || 'localhost', 
+      port: Number(process.env.DB_PORT ?? 5432),
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || '1234',
+      database: process.env.DB_DATABASE || 'booking_system',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: true, // Apenas para desenvolvimento
     }),
     SalasModule,
     UsuariosModule,
