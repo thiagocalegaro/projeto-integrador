@@ -30,10 +30,10 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 ---
 
 ### 1. Clonar o Repositório
-
+```bash
 git clone [https://github.com/thiagocalegaro/projeto-integrador](https://github.com/thiagocalegaro/projeto-integrador)
 cd projeto-integrador
-
+```
 
 
 ### 2. Executar o Ecossistema com Docker
