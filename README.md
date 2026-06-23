@@ -2,6 +2,7 @@ Aqui está o seu arquivo `README.md` atualizado para refletir a nova arquitetura
 
 ---
 
+```markdown
 # Agendamento de Salas | Politécnico
 
 Sistema completo para alocação, agendamento e gerenciamento de salas da instituição, construído com uma arquitetura moderna e totalmente conteinerizada utilizando NestJS, React e Docker.
@@ -16,6 +17,7 @@ Este projeto simplifica o processo de reserva de salas para os usuários e ofere
 
 ## 📁 Estrutura do Projeto
 
+```text
 sistema-agendamento-pi/
 ├── backend-api/          # API REST (NestJS) + Dockerfile
 ├── frontend-web/         # Interface SPA e Painel Admin (React) + Dockerfile
