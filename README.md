@@ -75,13 +75,6 @@ docker compose down
 
 ```
 
-Se por algum motivo você desejar apagar o banco de dados local para reiniciar os testes do zero, execute:
-
-```bash
-docker compose down -v
-
-```
-
 ## 👨‍💻 Autor
 
 **Thiago Calegaro**
