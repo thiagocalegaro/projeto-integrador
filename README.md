@@ -1,7 +1,3 @@
-Aqui está o seu arquivo `README.md` atualizado para refletir a nova arquitetura 100% conteinerizada. Agora, o manual explica como subir todo o ecossistema (Banco, API e Frontend) com um único comando do Docker.
-
----
-
 # Agendamento de Salas | Politécnico
 
 Sistema completo para alocação, agendamento e gerenciamento de salas da instituição, construído com uma arquitetura moderna e totalmente conteinerizada utilizando NestJS, React e Docker.
