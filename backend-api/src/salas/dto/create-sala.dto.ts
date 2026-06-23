@@ -8,12 +8,13 @@ import {
   IsArray,       
   ValidateNested
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { RecursoQuantidadeDto } from './recurso-quantidade.dto';
 
 export class CreateSalaDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => typeof value === 'string' ? value.trim().toUpperCase() : value)
   codigo: string;
 
   @IsString()

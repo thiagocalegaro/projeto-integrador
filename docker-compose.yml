@@ -1,0 +1,78 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: politecnico-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: booking_system
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - politecnico-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: politecnico-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@politecnico.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - '8080:80'
+    depends_on:
+      - postgres-db
+    networks:
+      - politecnico-network
+
+  backend-api:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    container_name: politecnico-backend
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend-api:/app
+      - /app/node_modules 
+    environment:
+      - PORT=3000
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_USERNAME=root
+      - DB_PASSWORD=1234
+      - DB_DATABASE=booking_system
+      - JWT_SECRET=chave_secreta_e_super_segura
+      - JWT_EXPIRES_IN=1d
+    depends_on:
+      - postgres-db
+    networks:
+      - politecnico-network
+
+  frontend-web:
+    build:
+      context: ./frontend/sas-frontend
+      dockerfile: Dockerfile
+    container_name: politecnico-frontend
+    restart: always
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend-web:/app
+      - /app/node_modules
+    depends_on:
+      - backend-api
+    networks:
+      - politecnico-network
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  politecnico-network:
+    driver: bridge

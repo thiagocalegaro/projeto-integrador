@@ -31,11 +31,7 @@ export class ExcecoesController {
     return this.excecoesService.findAll();
   }
 
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
-    return this.excecoesService.findOne(+id);
-  }
+
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)

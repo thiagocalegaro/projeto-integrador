@@ -1,16 +1,28 @@
-import { IsString, IsDateString, IsEnum, IsInt } from 'class-validator';
-import { Turno } from '../enums/turno.enum';
+import { IsNotEmpty, IsInt, IsString, IsDateString, IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateAgendamentoDto {
   @IsInt()
-  id_usuario: number;
-
-  @IsInt()
+  @IsNotEmpty()
   id_sala: number;
 
+  @IsString()
+  @IsNotEmpty()
+  motivo: string;
+
   @IsDateString()
+  @IsNotEmpty()
   data: string;
 
-  @IsEnum(Turno)
-  turno: Turno;
+  @IsNumber({}, { message: 'O ID do usuário deve ser um número válido.' })
+  @IsOptional() 
+  id_usuario?: number;
+
+  @IsBoolean()
+  turno_manha: boolean;
+
+  @IsBoolean()
+  turno_tarde: boolean;
+
+  @IsBoolean()
+  turno_noite: boolean;
 }

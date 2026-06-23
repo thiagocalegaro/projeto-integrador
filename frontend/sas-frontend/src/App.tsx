@@ -7,6 +7,9 @@ import GerenciarSalas from './pages/GerenciarSalas';
 import GerenciarRecursos from './pages/GerenciarRecursos';
 import GerenciarUsuarios from './pages/GerenciarUsuarios';
 import GerenciarExcecoes from './pages/GerenciarExcecoes';
+import DashboardUsuario from './pages/DashboardUsuario';
+import MeusAgendamentos from './pages/MeusAgendamentos';
+import GerenciarAgendamentos from './pages/GerenciarAgendamentos';
 
 const RotaProtegida = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('sas_token');
@@ -63,6 +66,30 @@ export default function App() {
           element={
             <RotaProtegida>
               <GerenciarUsuarios />
+            </RotaProtegida>
+          }
+        />
+        <Route 
+          path="/dashboard/usuario" 
+          element={
+            <RotaProtegida>
+              <DashboardUsuario />
+            </RotaProtegida>
+          }
+        />
+        <Route 
+          path="/meus-agendamentos" 
+          element={
+            <RotaProtegida>
+              <MeusAgendamentos />
+            </RotaProtegida>
+          } 
+        />
+        <Route
+          path="/dashboard/agendamentos"
+          element={
+            <RotaProtegida>
+              <GerenciarAgendamentos />
             </RotaProtegida>
           }
         />

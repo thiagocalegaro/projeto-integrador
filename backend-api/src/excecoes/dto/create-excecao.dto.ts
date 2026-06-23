@@ -1,7 +1,6 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsEnum, IsOptional, IsString, IsDateString } from 'class-validator';
 import { TipoExcecao } from '../enums/tipo-excecao.enum';
 import { ValidateIf, IsNumber } from 'class-validator';
-
 
 export enum EscopoExcecao {
   SALA_UNICA = 'SALA_UNICA',
@@ -10,19 +9,13 @@ export enum EscopoExcecao {
 }
 
 export class CreateExcecaoDto {
-  @IsDateString(
-    {},
-    { message: 'data_hora_inicio deve ser uma data ISO 8601 válida' },
-  )
+  @IsDateString({}, { message: 'A data deve ser um formato válido (AAAA-MM-DD)' })
   @IsNotEmpty()
-  inicio: string;
+  data_inicio: string;
 
-  @IsDateString(
-    {},
-    { message: 'data_hora_fim deve ser uma data ISO 8601 válida' },
-  )
+  @IsDateString({}, { message: 'A data de fim deve ser um formato válido (AAAA-MM-DD)' })
   @IsNotEmpty()
-  fim: string;
+  data_fim: string;
 
   @IsString()
   @IsNotEmpty()

@@ -3,15 +3,13 @@ import { AgendamentosService } from './agendamentos.service';
 import { AgendamentosController } from './agendamentos.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Agendamento } from './entities/agendamento.entity';
-import { SalasModule } from '../salas/salas.module';
-import { UsuariosModule } from '../usuarios/usuarios.module';
+import { Excecao } from '../excecoes/entities/excecoes.entity';
+import { Sala } from '../salas/entities/sala.entity';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Agendamento]),
-    SalasModule,
-    UsuariosModule,
-  ],
+    TypeOrmModule.forFeature([Agendamento, Sala, Excecao]),],
   controllers: [AgendamentosController],
   providers: [AgendamentosService],
 })

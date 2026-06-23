@@ -6,9 +6,10 @@ import { Sala } from './entities/sala.entity';
 import { SalaRecurso } from './entities/sala_recurso.entity';
 import { Agendamento } from '../agendamentos/entities/agendamento.entity';
 import { Excecao } from '../excecoes/entities/excecoes.entity';
+import { ExcecoesModule } from '../excecoes/excecoes.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Sala, SalaRecurso, Agendamento, Excecao])],
+  imports: [TypeOrmModule.forFeature([Sala, SalaRecurso, Agendamento, Excecao]), ExcecoesModule],
   controllers: [SalasController],
   providers: [SalasService],
   exports: [SalasService],

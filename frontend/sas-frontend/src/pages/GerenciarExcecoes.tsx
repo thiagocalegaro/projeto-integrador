@@ -12,8 +12,8 @@ interface Sala {
 
 interface Excecao {
   id: number;
-  inicio: string;
-  fim: string;
+  dataInicio: string; 
+  dataFim: string;   
   motivo: string;
   tipo: string;
   sala?: Sala;
@@ -24,13 +24,14 @@ export default function GerenciarExcecoes() {
   const [salas, setSalas] = useState<Sala[]>([]);
   const [busca, setBusca] = useState('');
   const [isModalAberto, setIsModalAberto] = useState(false);
-
   const [escopo, setEscopo] = useState('SALA_UNICA');
   const [idSala, setIdSala] = useState<number | ''>('');
   const [bloco, setBloco] = useState('');
   const [motivo, setMotivo] = useState('');
   const [inicio, setInicio] = useState('');
   const [fim, setFim] = useState('');
+
+  const hojeStr = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     carregarExcecoes();
@@ -72,8 +73,8 @@ export default function GerenciarExcecoes() {
       escopo,
       tipo: 'bloqueio', 
       motivo,
-      inicio: new Date(inicio).toISOString(),
-      fim: new Date(fim).toISOString(),
+      data_inicio: inicio, 
+      data_fim: fim,      
     };
 
     if (escopo === 'SALA_UNICA') payload.id_sala = Number(idSala);
@@ -102,9 +103,9 @@ export default function GerenciarExcecoes() {
   const blocosDisponiveis = Array.from(new Set(salas.map(s => s.bloco))).filter(Boolean);
 
   const excecoesFiltradas = excecoes.filter(exc =>
-    exc.motivo.toLowerCase().includes(busca.toLowerCase()) ||
-    exc.sala?.codigo.toLowerCase().includes(busca.toLowerCase()) ||
-    exc.sala?.bloco.toLowerCase().includes(busca.toLowerCase())
+    exc.motivo?.toLowerCase().includes(busca.toLowerCase()) ||
+    exc.sala?.codigo?.toLowerCase().includes(busca.toLowerCase()) ||
+    exc.sala?.bloco?.toLowerCase().includes(busca.toLowerCase())
   );
 
   return (
@@ -138,16 +139,16 @@ export default function GerenciarExcecoes() {
             </p>
           ) : (
             excecoesFiltradas.map(exc => {
-              const dataInicio = new Date(exc.inicio).toLocaleString('pt-BR');
-              const dataFim = new Date(exc.fim).toLocaleString('pt-BR');
+              const dInicio = new Date(exc.dataInicio + 'T00:00:00').toLocaleDateString('pt-BR');
+              const dFim = new Date(exc.dataFim + 'T00:00:00').toLocaleDateString('pt-BR');
 
               return (
                 <div key={exc.id} className={styles.excecaoCard}>
                   <div className={styles.cardInfo}>
                     <h3>{exc.motivo}</h3>
                     <p><strong>{exc.sala ? `Sala ${exc.sala.codigo} (Bloco ${exc.sala.bloco})` : 'Global (Todas as salas)'}</strong></p>
-                    <p><strong>Início:</strong> {dataInicio}</p>
-                    <p><strong>Fim:</strong> {dataFim}</p>
+                    <p><strong>Início:</strong> {dInicio}</p>
+                    <p><strong>Fim:</strong> {dFim}</p>
                   </div>
 
                   <div className={styles.actionIcons}>
@@ -199,7 +200,7 @@ export default function GerenciarExcecoes() {
                   <select className={styles.modalInput} value={bloco} onChange={e => setBloco(e.target.value)} required>
                     <option value="">Selecione...</option>
                     {blocosDisponiveis.map((b, idx) => (
-                      <option key={idx} value={`Bloco ${b}`}>Bloco {b}</option>
+                      <option key={idx} value={b}>Bloco {b}</option>
                     ))}
                   </select>
                 </div>
@@ -217,14 +218,31 @@ export default function GerenciarExcecoes() {
                 />
               </div>
 
-              <div className={styles.rowGroup}>
-                <div className={styles.formGroup}>
-                  <label className={styles.modalLabel}>Data/Hora Início:</label>
-                  <input type="datetime-local" className={styles.modalInput} value={inicio} onChange={e => setInicio(e.target.value)} required />
+              <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label className={styles.modalLabel}>Data Início:</label>
+                  <input 
+                    type="date" 
+                    className={styles.modalInput} 
+                    value={inicio} 
+                    min={hojeStr} 
+                    onChange={e => {
+                      setInicio(e.target.value);
+                      if (fim && e.target.value > fim) setFim('');
+                    }} 
+                    required 
+                  />
                 </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.modalLabel}>Data/Hora Fim:</label>
-                  <input type="datetime-local" className={styles.modalInput} value={fim} onChange={e => setFim(e.target.value)} required />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label className={styles.modalLabel}>Data Fim:</label>
+                  <input 
+                    type="date" 
+                    className={styles.modalInput} 
+                    value={fim} 
+                    min={inicio || hojeStr} 
+                    onChange={e => setFim(e.target.value)} 
+                    required 
+                  />
                 </div>
               </div>
 

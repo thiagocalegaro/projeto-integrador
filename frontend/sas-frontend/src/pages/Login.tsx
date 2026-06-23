@@ -16,8 +16,17 @@ export default function Login() {
 
     try {
       const resposta = await api.post('/auth/login', { email, senha });
-      localStorage.setItem('sas_token', resposta.data.access_token);
-      navigate('/dashboard');
+      const token = resposta.data.access_token;
+      localStorage.setItem('sas_token', token);
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+
+      if (payload.tipo === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/dashboard/usuario'); 
+      }
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Falha ao realizar login.';
       setErro(Array.isArray(msg) ? msg[0] : msg);

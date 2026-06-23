@@ -11,10 +11,12 @@ export class AuthService {
   ) {}
 
   async login(loginDto: any): Promise<{ access_token: string }> {
+    const senhaFornecida = loginDto.senha || loginDto.password;
     const usuario = await this.usuariosService.login(
       loginDto.email,
-      loginDto.senha,
+      senhaFornecida,
     );
+    
 
     const payload = {
       sub: usuario.id,

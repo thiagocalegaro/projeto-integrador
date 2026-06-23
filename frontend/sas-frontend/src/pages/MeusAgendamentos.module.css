@@ -1,0 +1,162 @@
+.container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.main {
+  padding: 40px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.titulo {
+  font-size: 28px;
+  color: #1e293b;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.subtitulo {
+  font-size: 15px;
+  color: #64748b;
+  margin-bottom: 35px;
+}
+
+/* 📅 Container da Linha do Tempo/Cards */
+.cardsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cardAgendamento {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
+  border-left: 5px solid #004080; /* Destaque lateral indicando ativo */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cardAgendamento:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 🔒 Estilo quando o agendamento já passou */
+.cardPassado {
+  border-left-color: #94a3b8;
+  background-color: #f1f5f9;
+  opacity: 0.85;
+}
+
+/* 🧩 Seções Internas do Card */
+.infoPrincipal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.salaNome {
+  font-size: 18px;
+  color: #0f172a;
+  margin: 0;
+  font-weight: 600;
+}
+
+.motivoText {
+  font-size: 15px;
+  color: #334155;
+  margin: 4px 0 0 0;
+}
+
+/* 🏷️ Badges de Turnos */
+.turnosWrapper {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.turnoBadge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+}
+
+.turnoBadgeAtivo {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+/* 🗑️ Botão de Ação Lateral */
+.btnAcaoWrapper {
+  margin-left: 20px;
+}
+
+.cancelarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #ffe4e6;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelarBtn:hover:not(:disabled) {
+  background-color: #e11d48;
+  color: white;
+  border-color: #e11d48;
+}
+
+.cancelarBtn:disabled {
+  background-color: #f1f5f9;
+  color: #cbd5e1;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+/* Responsividade Básica */
+@media (max-width: 600px) {
+  .cardAgendamento {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .btnAcaoWrapper {
+    margin-left: 0;
+    width: 100%;
+  }
+  .cancelarBtn {
+    width: 100%;
+    height: 40px;
+  }
+}

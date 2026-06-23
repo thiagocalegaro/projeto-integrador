@@ -1,188 +1,186 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, MoreThanOrEqual } from 'typeorm';
-import { addWeeks } from 'date-fns';
+import { Repository, IsNull, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 import { Agendamento } from './entities/agendamento.entity';
 import { CreateAgendamentoDto } from './dto/create-agendamento.dto';
-import { CreateAgendamentoRecorrenteDto } from './dto/create-agendamento-recorrente.dto';
-import { SalasService } from '../salas/salas.service';
-import { UsuariosService } from '../usuarios/usuarios.service';
-import { Turno } from './enums/turno.enum';
+import { Sala } from '../salas/entities/sala.entity';
+import { Excecao } from '../excecoes/entities/excecoes.entity';
+import { TipoExcecao } from '../excecoes/enums/tipo-excecao.enum';
+import { UpdateAgendamentoDto } from './dto/update-agendamento.dto';
 
 @Injectable()
 export class AgendamentosService {
   constructor(
     @InjectRepository(Agendamento)
-    private readonly agendamentosRepository: Repository<Agendamento>,
-    private readonly salasService: SalasService,
-    private readonly usuariosService: UsuariosService,
-    private readonly dataSource: DataSource,
+    private readonly agendamentoRepository: Repository<Agendamento>,
+    @InjectRepository(Sala)
+    private readonly salaRepository: Repository<Sala>,
+    @InjectRepository(Excecao)
+    private readonly excecoesRepository: Repository<Excecao>,
   ) {}
 
-  async create(dto: CreateAgendamentoDto): Promise<Agendamento> {
-    // 1. Busca a sala e valida se existe
-    const sala = await this.salasService.findOne(dto.id_sala);
+  async create(dto: CreateAgendamentoDto, idUsuarioLogado: number): Promise<Agendamento> {
+    const { data, id_sala } = dto;
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const dataReserva = new Date(data + 'T00:00:00');
+    dataReserva.setHours(0, 0, 0, 0);
+
+    if (dataReserva.getTime() < hoje.getTime()) {
+      throw new BadRequestException('Não é permitido realizar agendamentos em datas passadas.');
+    }
+    if (!dto.turno_manha && !dto.turno_tarde && !dto.turno_noite) {
+      throw new BadRequestException('Você precisa selecionar ao menos um turno para o agendamento.');
+    }
+
+    const dataAgendamento = dataReserva;
+
+    const sala = await this.salaRepository.findOne({ where: { id_sala: dto.id_sala } });
     if (!sala) {
-      throw new NotFoundException(`Sala com ID ${dto.id_sala} não encontrada.`);
+      throw new NotFoundException('Sala não encontrada.');
+    }
+    if (!sala.ativa) {
+      throw new BadRequestException('Não é possível agendar uma sala desativada.');
     }
 
-    this.validarFuncionamentoSalaTurno(sala, dto.turno);
+    if (dto.turno_manha && !sala.disponivel_manha) throw new BadRequestException('Esta sala não funciona no turno da manhã.');
+    if (dto.turno_tarde && !sala.disponivel_tarde) throw new BadRequestException('Esta sala não funciona no turno da tarde.');
+    if (dto.turno_noite && !sala.disponivel_noite) throw new BadRequestException('Esta sala não funciona no turno da noite.');
 
-    const dataAgendamento = new Date(dto.data);
-    const isDisponivel = await this.verificarDisponibilidade(dto.id_sala, dataAgendamento, dto.turno);
-    if (!isDisponivel) {
-      throw new ConflictException(`A sala já está ocupada neste turno.`);
-    }
-
-    const usuario = await this.usuariosService.findOne(dto.id_usuario);
-    if (!usuario) {
-      throw new NotFoundException(`Usuário com ID ${dto.id_usuario} não encontrado.`);
-    }
-
-    const novoAgendamento = this.agendamentosRepository.create({
-      data: dataAgendamento,
-      turno: dto.turno,
-      sala,
-      usuario,
-    });
-    return this.agendamentosRepository.save(novoAgendamento);
-  }
-
-  async createRecorrente(dto: CreateAgendamentoRecorrenteDto): Promise<Agendamento[]> {
-    const { id_sala, id_usuario, data, turno, numero_de_semanas } = dto;
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const sala = await this.salasService.findOne(id_sala);
-      if (!sala) throw new NotFoundException(`Sala com ID ${id_sala} não encontrada.`);
-
-      const usuario = await this.usuariosService.findOne(id_usuario);
-      if (!usuario) throw new NotFoundException(`Usuário com ID ${id_usuario} não encontrado.`);
-
-      this.validarFuncionamentoSalaTurno(sala, turno);
-
-      const agendamentosCriados: Agendamento[] = [];
-      const dataInicial = new Date(data);
-
-      for (let i = 0; i < numero_de_semanas; i++) {
-        const dataDaSemana = addWeeks(dataInicial, i);
-
-        const conflito = await queryRunner.manager.findOne(Agendamento, {
-          where: {
-            sala: { id_sala },
-            data: dataDaSemana,
-            turno: turno,
-          },
-        });
-
-        if (conflito) {
-          throw new ConflictException(
-            `A sala já está ocupada no turno solicitado na data ${dataDaSemana.toISOString().split('T')[0]}`
-          );
+    const bloqueioAtivo = await this.excecoesRepository.findOne({
+      where: [
+        { 
+          sala: { id_sala: sala.id_sala }, 
+          tipo: TipoExcecao.Bloqueio, 
+          dataInicio: LessThanOrEqual(dataAgendamento), 
+          dataFim: MoreThanOrEqual(dataAgendamento) 
+        },
+        { 
+          bloco: sala.bloco, 
+          tipo: TipoExcecao.Bloqueio, 
+          dataInicio: LessThanOrEqual(dataAgendamento), 
+          dataFim: MoreThanOrEqual(dataAgendamento) 
+        },
+        { 
+          sala: IsNull(), 
+          bloco: IsNull(), 
+          tipo: TipoExcecao.Bloqueio, 
+          dataInicio: LessThanOrEqual(dataAgendamento), 
+          dataFim: MoreThanOrEqual(dataAgendamento) 
         }
+      ]
+    });
 
-        const novoAgendamento = queryRunner.manager.create(Agendamento, {
-          data: dataDaSemana,
-          turno: turno,
-          sala,
-          usuario,
-        });
+    if (bloqueioAtivo) {
+      throw new ConflictException(`A sala está indisponível nesta data devido ao bloqueio: ${bloqueioAtivo.motivo}`);
+    }
 
-        const agendamentoSalvo = await queryRunner.manager.save(novoAgendamento);
-        agendamentosCriados.push(agendamentoSalvo);
+    const agendamentosDoDia = await this.agendamentoRepository.find({
+      where: {
+        sala: { id_sala: sala.id_sala },
+        data: dataAgendamento
       }
+    });
 
-      await queryRunner.commitTransaction();
-      return agendamentosCriados;
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
+    for (const agendamento of agendamentosDoDia) {
+      if (dto.turno_manha && agendamento.turno_manha) throw new ConflictException('O turno da manhã já está ocupado nesta data.');
+      if (dto.turno_tarde && agendamento.turno_tarde) throw new ConflictException('O turno da tarde já está ocupado nesta data.');
+      if (dto.turno_noite && agendamento.turno_noite) throw new ConflictException('O turno da noite já está ocupado nesta data.');
+    }
+
+    const novoAgendamento = this.agendamentoRepository.create({
+      data: dataAgendamento,
+      turno_manha: dto.turno_manha ?? false,
+      turno_tarde: dto.turno_tarde ?? false,
+      turno_noite: dto.turno_noite ?? false,
+      motivo: dto.motivo,
+      sala: sala,
+      usuario: { id: dto.id_usuario || idUsuarioLogado } as any,
+    });
+
+    return await this.agendamentoRepository.save(novoAgendamento);
+  }
+
+  async findAll(): Promise<Agendamento[]> {
+    return this.agendamentoRepository.find({
+      relations: ['sala', 'usuario'],
+      order: { data: 'ASC' },
+    });
+  }
+
+  async remove(id: number): Promise<void> {
+    const resultado = await this.agendamentoRepository.delete(id);
+    if (resultado.affected === 0) {
+      throw new NotFoundException('Agendamento não encontrado.');
     }
   }
 
-  async verificarDisponibilidade(id_sala: number, data: Date, turno: Turno): Promise<boolean> {
-    const conflitos = await this.agendamentosRepository.count({
+  async update(id: number, dto: UpdateAgendamentoDto): Promise<Agendamento> {
+  const agendamento = await this.agendamentoRepository.findOne({ 
+    where: { id_agendamento: id },
+    relations: ['sala'] 
+  });
+  if (!agendamento) {
+    throw new NotFoundException('Agendamento não encontrado.');
+  }
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const dataReserva = new Date(dto.data + 'T00:00:00');
+  dataReserva.setHours(0, 0, 0, 0);
+
+  if (dataReserva.getTime() < hoje.getTime()) {
+    throw new BadRequestException('Não é permitido atualizar agendamentos para datas passadas.');
+  }
+  if (!dto.turno_manha && !dto.turno_tarde && !dto.turno_noite) {
+    throw new BadRequestException('Você precisa selecionar ao menos um turno.');
+  }
+
+  const sala = await this.salaRepository.findOne({ where: { id_sala: dto.id_sala } });
+  if (!sala) throw new NotFoundException('Sala não encontrada.');
+  if (!sala.ativa) throw new BadRequestException('Não é possível agendar uma sala desativada.');
+
+  if (dto.turno_manha && !sala.disponivel_manha) throw new BadRequestException('Esta sala não funciona pela manhã.');
+  if (dto.turno_tarde && !sala.disponivel_tarde) throw new BadRequestException('Esta sala não funciona pela tarde.');
+  if (dto.turno_noite && !sala.disponivel_noite) throw new BadRequestException('Esta sala não funciona pela noite.');
+
+  const bloqueioAtivo = await this.excecoesRepository.findOne({
+    where: [
+      { sala: { id_sala: sala.id_sala }, tipo: TipoExcecao.Bloqueio, dataInicio: LessThanOrEqual(dataReserva), dataFim: MoreThanOrEqual(dataReserva) },
+      { bloco: sala.bloco, tipo: TipoExcecao.Bloqueio, dataInicio: LessThanOrEqual(dataReserva), dataFim: MoreThanOrEqual(dataReserva) },
+      { sala: IsNull(), bloco: IsNull(), tipo: TipoExcecao.Bloqueio, dataInicio: LessThanOrEqual(dataReserva), dataFim: MoreThanOrEqual(dataReserva) }
+    ]
+  });
+  if (bloqueioAtivo) {
+    throw new ConflictException(`A sala está bloqueada neste período: ${bloqueioAtivo.motivo}`);
+  }
+
+  const agendamentosDoDia = await this.agendamentoRepository.find({
       where: {
-        sala: { id_sala },
-        data: data,
-        turno: turno,
-      },
-    });
-    return conflitos === 0;
-  }
-
-  async findAll() {
-    return this.agendamentosRepository.find({
-      relations: { sala: true, usuario: true }, 
-      order: { data: 'DESC' },
-    });
-  }
-
-  async findMy(userId: number): Promise<Agendamento[]> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return this.agendamentosRepository.find({
-      where: {
-        usuario: { id_usuario: userId } as any, 
-        data: MoreThanOrEqual(today),
-      },
-      relations: { sala: true }, 
-      order: {
-        data: 'ASC',
-        turno: 'ASC',
-      },
-    });
-  }
-
-  async findOne(id: number) {
-    const agendamento = await this.agendamentosRepository.findOne({
-      where: { id_agendamento: id },
-      relations: { sala: true, usuario: true },
+        sala: { id_sala: sala.id_sala },
+        data: dataReserva,
+        id_agendamento: Not(id)
+      }
     });
 
-    if (!agendamento) {
-      throw new NotFoundException(`Agendamento com ID ${id} não encontrado.`);
-    }
-
-    return agendamento;
+  for (const item of agendamentosDoDia) {
+    if (dto.turno_manha && item.turno_manha) throw new ConflictException('O turno da manhã já está ocupado nesta data.');
+    if (dto.turno_tarde && item.turno_tarde) throw new ConflictException('O turno da tarde já está ocupado nesta data.');
+    if (dto.turno_noite && item.turno_noite) throw new ConflictException('O turno da noite já está ocupado nesta data.');
   }
 
-  remove(id: number) {
-    return this.agendamentosRepository.delete(id); 
+  agendamento.data = dataReserva;
+  agendamento.motivo = dto.motivo ?? '';
+  agendamento.turno_manha = dto.turno_manha ?? false;
+  agendamento.turno_tarde = dto.turno_tarde ?? false;
+  agendamento.turno_noite = dto.turno_noite ?? false;
+  agendamento.sala = sala;
+  
+  if (dto.id_usuario) {
+    agendamento.usuario = { id: dto.id_usuario } as any;
   }
 
-  async findTurnosOcupados(id_sala: number, data: string) {
-    const agendamentos = await this.agendamentosRepository.find({
-      where: {
-        sala: { id_sala },
-        data: new Date(data),
-      },
-      order: { turno: 'ASC' },
-    });
-    return agendamentos.map((a) => ({
-      turno_ocupado: a.turno,
-    }));
-  }
-
-  private validarFuncionamentoSalaTurno(sala: any, turno: Turno): void {
-    if (turno === Turno.MANHA && !sala.disponivel_manha) {
-      throw new ConflictException('Esta sala não está disponível no turno da manhã.');
-    }
-    if (turno === Turno.TARDE && !sala.disponivel_tarde) {
-      throw new ConflictException('Esta sala não está disponível no turno da tarde.');
-    }
-    if (turno === Turno.NOITE && !sala.disponivel_noite) {
-      throw new ConflictException('Esta sala não está disponível no turno da noite.');
-    }
-  }
+  return await this.agendamentoRepository.save(agendamento);
+}
 }
