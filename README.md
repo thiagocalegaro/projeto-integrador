@@ -87,6 +87,3 @@ docker compose down -v
 **Thiago Calegaro**
 
 * GitHub: [@thiagocalegaro](https://github.com/thiagocalegaro)
-
-
-
